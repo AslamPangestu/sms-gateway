@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">Perumahan</string>
+    <string name="sender">Pengirim</string>
+    <string name="hint_sender">Masukkan nama pengirim</string>
+    <string name="submit">Submit</string>
+    <string name="add_receiver">+</string>
+    <string name="receiver">Penerima</string>
+    <string name="hint_receiver">Masukkan no penerima</string>
+    <string name="message">Isi Pesan: </string>
+    <string name="log">Log: </string>
+</resources>
