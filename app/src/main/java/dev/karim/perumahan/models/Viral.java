@@ -6,9 +6,15 @@ package dev.karim.perumahan.models;
  */
 
 public class Viral {
-    private String status;
+    private Response response;
 
-    public String getStatus() {
-        return status;
+    public Response getResponse ()
+    {
+        return response;
+    }
+
+    public void setResponse (Response response)
+    {
+        this.response = response;
     }
 }
