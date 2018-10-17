@@ -6,6 +6,8 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
+import static dev.karim.perumahan.BuildConfig.SMS_GATEWAY_URL;
+
 /**
  * Created by mvryan on 03/08/18.
  */
@@ -13,7 +15,6 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 public class NetworksNotif {
 
     public final static String NOTIF_URL = "http://192.168.100.3:8080/";//local_ip/route_name
-    public final static String VIRAL_URL = "https://reguler.zenziva.net/apps/";//local_ip/route_name
 
     private static Retrofit retrofit = null;
 
@@ -44,7 +45,7 @@ public class NetworksNotif {
         interceptor();
 
         retrofit = new Retrofit.Builder()
-                .baseUrl(VIRAL_URL)
+                .baseUrl(SMS_GATEWAY_URL)
                 .addConverterFactory(SimpleXmlConverterFactory.create())
                 .client(client)
                 .build();

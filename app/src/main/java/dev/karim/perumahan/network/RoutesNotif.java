@@ -14,10 +14,10 @@ import retrofit2.http.Query;
 
 public interface RoutesNotif {
 
-    @GET("viral/{id}")
-    Call<ResultNotif> getNotif(
-            @Path("id") Integer id
-    );
+//    @GET("viral/{id}")
+//    Call<ResultNotif> getNotif(
+//            @Path("id") Integer id
+//    );
 
     @POST("smsapi.php")
     Call<Viral> getViral(@Query("userkey") String userkey,

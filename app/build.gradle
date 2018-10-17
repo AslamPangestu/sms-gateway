@@ -12,9 +12,17 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            buildConfigField 'String', "USERKEY", USERKEY
+            buildConfigField 'String', "PASSKEY", PASSKEY
+            buildConfigField 'String', "SMS_GATEWAY_URL", SMS_GATEWAY_URL
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField 'String', "USERKEY", USERKEY
+            buildConfigField 'String', "PASSKEY", PASSKEY
+            buildConfigField 'String', "SMS_GATEWAY_URL", SMS_GATEWAY_URL
         }
     }
 }

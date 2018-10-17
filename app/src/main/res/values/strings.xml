@@ -8,4 +8,5 @@
     <string name="hint_receiver">Masukkan no penerima</string>
     <string name="message">Isi Pesan: </string>
     <string name="log">Log: </string>
+    <string name="hint_message">Masukkan isi pesan</string>
 </resources>
