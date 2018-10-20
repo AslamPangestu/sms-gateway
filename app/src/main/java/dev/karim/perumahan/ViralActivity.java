@@ -6,19 +6,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import dev.karim.perumahan.models.Notif;
-import dev.karim.perumahan.models.ResultNotif;
-import dev.karim.perumahan.models.Viral;
+import dev.karim.perumahan.model.Viral;
 import dev.karim.perumahan.network.NetworksNotif;
 import dev.karim.perumahan.network.RoutesNotif;
 import retrofit2.Call;
@@ -34,6 +32,7 @@ public class ViralActivity extends AppCompatActivity {
 
     private Button btnSubmit, btnAddReceiver;
     private EditText etSender, etReceiver, etMessage;
+    private TextView tvLog;
     private LinearLayout mainLayout;
 
     public String sender;
@@ -72,15 +71,21 @@ public class ViralActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (countView == texts.size()) {
+                    for (int j = 0; j < texts.size(); j++) {
+                        mainLayout.removeView(tvLog);
+                    }
+                }
                 isSubmit = true;
                 sender = etSender.getText().toString();
                 String isipesan = etMessage.getText().toString();
                 newReceive = new String[texts.size()];
                 for (int i = 0; i < texts.size(); i++) {
                     newReceive[i] = texts.get(i).getText().toString();
+                    getViral(newReceive[i], isipesan,sender);
                     Log.d("number", newReceive[i]);
+                    countView++;
 //                    getNotif(i);
-                    getViral(newReceive[i],isipesan);
                 }
             }
         });
@@ -91,7 +96,7 @@ public class ViralActivity extends AppCompatActivity {
 //        Call<ResultNotif> resultCall = routesNotif.getNotif(rowid);
 //        resultCall.enqueue(new Callback<ResultNotif>() {
 //            @Override
-//            public void onResponse(Call<ResultNotif> call, Response<ResultNotif> response) {
+//            public void onResponse(Call<ResultNotif> call, Viral<ResultNotif> response) {
 //                Notif notif = response.body().getNotif();
 //                String isipesan = notif.getIsinotif();
 //                if (!isSubmit) {
@@ -117,18 +122,41 @@ public class ViralActivity extends AppCompatActivity {
 //        });
 //    }
 
-    private void getViral(final String receiver,  final String isiPesan) {
+    private void getViral(final String receiver, final String isiPesan, final String sender) {
         RoutesNotif routesNotif = NetworksNotif.viralRequest().create(RoutesNotif.class);
         Call<Viral> viralCall = routesNotif.getViral(USERKEY, PASSKEY, receiver, isiPesan);
         viralCall.enqueue(new Callback<Viral>() {
             @Override
             public void onResponse(Call<Viral> call, Response<Viral> response) {
-                Toast.makeText(getApplicationContext(), "Failde Send Message", Toast.LENGTH_LONG).show();
+                if(response.isSuccessful()){
+                    String status = response.body().getMessage().getText();
+                    String receiver = response.body().getMessage().getTo();
+                    tvLog = new TextView(getApplicationContext());
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT);
+                    tvLog.setLayoutParams(params);
+                    tvLog.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
+                    tvLog.setText(sender + status +
+                            " mengirim ke " + receiver +
+                            " dengan pesan " + isiPesan);
+                    mainLayout.addView(tvLog);
+                    Toast.makeText(getApplicationContext(), "Success Send Message", Toast.LENGTH_LONG).show();
+                }else {
+                    Toast.makeText(getApplicationContext(), "Failde Send Message", Toast.LENGTH_LONG).show();
+                }
             }
 
             @Override
             public void onFailure(Call<Viral> call, Throwable t) {
-                Toast.makeText(getApplicationContext(), "Success Send Message", Toast.LENGTH_LONG).show();
+                if (t instanceof IOException) {
+                    Toast.makeText(getApplicationContext(), "this is an actual network failure :( inform the user and possibly retry", Toast.LENGTH_SHORT).show();
+                    // logging probably not necessary
+                }
+                else {
+                    Toast.makeText(getApplicationContext(), "conversion issue! big problems :(", Toast.LENGTH_SHORT).show();
+                    // todo log to some central bug tracking service
+                }
             }
         });
     }

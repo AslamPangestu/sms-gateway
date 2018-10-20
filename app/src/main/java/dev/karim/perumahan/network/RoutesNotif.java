@@ -1,11 +1,8 @@
 package dev.karim.perumahan.network;
 
-import dev.karim.perumahan.models.ResultNotif;
-import dev.karim.perumahan.models.Viral;
+import dev.karim.perumahan.model.Viral;
 import retrofit2.Call;
-import retrofit2.http.GET;
 import retrofit2.http.POST;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
