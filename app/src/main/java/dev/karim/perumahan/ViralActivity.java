@@ -57,8 +57,6 @@ public class ViralActivity extends AppCompatActivity {
         btnSubmit = findViewById(R.id.submit);
         btnAddReceiver = findViewById(R.id.add_receiver);
 
-//        getNotif(0);
-
         btnAddReceiver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -66,6 +64,7 @@ public class ViralActivity extends AppCompatActivity {
                 if (nReceiver == 10) {
                     btnAddReceiver.setVisibility(View.GONE);
                 }
+                pos = 3;
             }
         });
         btnSubmit.setOnClickListener(new View.OnClickListener() {
@@ -85,42 +84,14 @@ public class ViralActivity extends AppCompatActivity {
                     getViral(newReceive[i], isipesan,sender);
                     Log.d("number", newReceive[i]);
                     countView++;
-//                    getNotif(i);
                 }
+                Log.d("receiver",nReceiver+"");
+                mainLayout.removeViews(3,nReceiver);
+                nReceiver = 0;
             }
         });
     }
 
-//    private void getNotif(final int counter) {
-//        RoutesNotif routesNotif = NetworksNotif.notifRequest().create(RoutesNotif.class);
-//        Call<ResultNotif> resultCall = routesNotif.getNotif(rowid);
-//        resultCall.enqueue(new Callback<ResultNotif>() {
-//            @Override
-//            public void onResponse(Call<ResultNotif> call, Viral<ResultNotif> response) {
-//                Notif notif = response.body().getNotif();
-//                String isipesan = notif.getIsinotif();
-//                if (!isSubmit) {
-//                    tvPreview.setText(isipesan);
-//                } else {
-//                    message = "Dari " + etSender.getText() + "/n" + isipesan;
-//                    tvPreview.setText(message);
-//                    if (countView == texts.size()){
-//                        for (int j = 0; j < texts.size();j++){
-//                            mainLayout.removeView(tvLog);
-//                            Log.d("remove","remove view");
-//                        }
-//                    }
-//                    countView++;
-//                    getViral(newReceive[counter], counter);
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(Call<ResultNotif> call, Throwable t) {
-//                Toast.makeText(getApplicationContext(), "Failed", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
 
     private void getViral(final String receiver, final String isiPesan, final String sender) {
         RoutesNotif routesNotif = NetworksNotif.viralRequest().create(RoutesNotif.class);
@@ -131,16 +102,7 @@ public class ViralActivity extends AppCompatActivity {
                 if(response.isSuccessful()){
                     String status = response.body().getMessage().getText();
                     String receiver = response.body().getMessage().getTo();
-                    tvLog = new TextView(getApplicationContext());
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT);
-                    tvLog.setLayoutParams(params);
-                    tvLog.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
-                    tvLog.setText(sender + status +
-                            " mengirim ke " + receiver +
-                            " dengan pesan " + isiPesan);
-                    mainLayout.addView(tvLog);
+                    addLog(status,receiver,isiPesan);
                     Toast.makeText(getApplicationContext(), "Success Send Message", Toast.LENGTH_LONG).show();
                 }else {
                     Toast.makeText(getApplicationContext(), "Failde Send Message", Toast.LENGTH_LONG).show();
@@ -176,5 +138,19 @@ public class ViralActivity extends AppCompatActivity {
 
         mainLayout.addView(etReceiver, pos);
         pos++;
+    }
+
+    private void addLog(String status, String receiver, String isiPesan) {
+
+        tvLog = new TextView(getApplicationContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        tvLog.setLayoutParams(params);
+        tvLog.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
+        tvLog.setText(sender + status +
+                " mengirim ke " + receiver +
+                " dengan pesan " + isiPesan);
+        mainLayout.addView(tvLog);
     }
 }
