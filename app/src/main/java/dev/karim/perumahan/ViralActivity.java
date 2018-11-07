@@ -1,5 +1,6 @@
 package dev.karim.perumahan;
 
+import android.content.SharedPreferences;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -38,8 +39,9 @@ public class ViralActivity extends AppCompatActivity {
     public String sender;
     public String message;
 
-    public boolean isSubmit = false;
     public int nReceiver = 0;
+    public int maxReceiver = 20;
+    private static final String CURRENT_RECEIVER = "current_receiver";
     public int pos = 3;
     public List<EditText> texts = new ArrayList<>();
     public String[] newReceive;
@@ -57,6 +59,9 @@ public class ViralActivity extends AppCompatActivity {
         btnSubmit = findViewById(R.id.submit);
         btnAddReceiver = findViewById(R.id.add_receiver);
 
+        final SharedPreferences pref = getApplicationContext().getSharedPreferences(CURRENT_RECEIVER, MODE_PRIVATE);
+        final SharedPreferences.Editor editor = pref.edit();
+
         btnAddReceiver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -64,7 +69,6 @@ public class ViralActivity extends AppCompatActivity {
                 if (nReceiver == 10) {
                     btnAddReceiver.setVisibility(View.GONE);
                 }
-                pos = 3;
             }
         });
         btnSubmit.setOnClickListener(new View.OnClickListener() {
@@ -75,19 +79,31 @@ public class ViralActivity extends AppCompatActivity {
                         mainLayout.removeView(tvLog);
                     }
                 }
-                isSubmit = true;
-                sender = etSender.getText().toString();
-                String isipesan = etMessage.getText().toString();
-                newReceive = new String[texts.size()];
-                for (int i = 0; i < texts.size(); i++) {
-                    newReceive[i] = texts.get(i).getText().toString();
-                    getViral(newReceive[i], isipesan,sender);
-                    Log.d("number", newReceive[i]);
-                    countView++;
+                if (pref.getInt(CURRENT_RECEIVER,nReceiver)==maxReceiver){
+                    Toast.makeText(getApplicationContext(),"Maaf, sudah mencapai kuota bulanan",Toast.LENGTH_LONG).show();
+                }else {
+                    sender = etSender.getText().toString();
+                    String isipesan = etMessage.getText().toString();
+                    newReceive = new String[texts.size()];
+                    for (int i = 0; i < texts.size(); i++) {
+                        if (texts.size() == 0){
+                            Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
+                        }
+                        newReceive[i] = texts.get(i).getText().toString();
+                        getViral(newReceive[i], isipesan,sender);
+                        countView++;
+                    }
+                    Log.d("receiver",nReceiver+"");
+                    editor.putInt(CURRENT_RECEIVER,nReceiver);
+                    editor.apply();
+                    mainLayout.removeViews(3,nReceiver);
+                    if (nReceiver == 10){
+                        btnAddReceiver.setVisibility(View.VISIBLE);
+                    }
+                    pos = 3;
+                    nReceiver = 0;
+                    Log.d("Max Receiver",pref.getInt(CURRENT_RECEIVER,0)+"");
                 }
-                Log.d("receiver",nReceiver+"");
-                mainLayout.removeViews(3,nReceiver);
-                nReceiver = 0;
             }
         });
     }
