@@ -31,21 +31,27 @@ import static dev.karim.perumahan.BuildConfig.USERKEY;
 
 public class ViralActivity extends AppCompatActivity {
 
-    private Button btnSubmit, btnAddReceiver;
-    private EditText etSender, etReceiver, etMessage;
-    private TextView tvLog;
-    private LinearLayout mainLayout;
+    //Layout
+    Button btnSubmit, btnAddReceiver;
+    EditText etSender, etReceiver, etMessage;
+    TextView tvLog,tvQuota,tvMaxQuota;
+    LinearLayout mainLayout;
 
-    public String sender;
-    public String message;
-
-    public int nReceiver = 0;
-    public int maxReceiver = 20;
     private static final String CURRENT_RECEIVER = "current_receiver";
-    public int pos = 3;
-    public List<EditText> texts = new ArrayList<>();
-    public String[] newReceive;
-    public int countView = 0;
+
+    String sender;
+    String message;
+
+    //counter
+    int nEtReceiver = 0;
+    String maxReceiver = "20";
+    String currentReceiver;
+    int currentQuota;
+    int countView = 0;
+    int pos = 3;
+
+    List<EditText> texts = new ArrayList<>();
+    String[] newReceive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,24 +59,30 @@ public class ViralActivity extends AppCompatActivity {
         setContentView(R.layout.activity_viral);
 
         mainLayout = findViewById(R.id.main_viral);
-
         etSender = findViewById(R.id.sender);
         etMessage = findViewById(R.id.message);
         btnSubmit = findViewById(R.id.submit);
         btnAddReceiver = findViewById(R.id.add_receiver);
+        tvQuota = findViewById(R.id.quota_counter);
+        tvMaxQuota = findViewById(R.id.max_quota);
+
+        tvMaxQuota.setText(maxReceiver);
 
         final SharedPreferences pref = getApplicationContext().getSharedPreferences(CURRENT_RECEIVER, MODE_PRIVATE);
         final SharedPreferences.Editor editor = pref.edit();
+
+        setCurrentQuota(pref, editor, currentQuota);
 
         btnAddReceiver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addReceiver();
-                if (nReceiver == 10) {
+                if (nEtReceiver == 10 || currentReceiver.equals(maxReceiver)) {
                     btnAddReceiver.setVisibility(View.GONE);
                 }
             }
         });
+
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,30 +91,23 @@ public class ViralActivity extends AppCompatActivity {
                         mainLayout.removeView(tvLog);
                     }
                 }
-                if (pref.getInt(CURRENT_RECEIVER,nReceiver)==maxReceiver){
+                if (currentReceiver.equals(maxReceiver)){
                     Toast.makeText(getApplicationContext(),"Maaf, sudah mencapai kuota bulanan",Toast.LENGTH_LONG).show();
                 }else {
                     sender = etSender.getText().toString();
-                    String isipesan = etMessage.getText().toString();
+                    message = etMessage.getText().toString();
                     newReceive = new String[texts.size()];
                     for (int i = 0; i < texts.size(); i++) {
                         if (texts.size() == 0){
                             Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
                         }
                         newReceive[i] = texts.get(i).getText().toString();
-                        getViral(newReceive[i], isipesan,sender);
+                        getViral(newReceive[i], message,sender);
                         countView++;
                     }
-                    Log.d("receiver",nReceiver+"");
-                    editor.putInt(CURRENT_RECEIVER,nReceiver);
-                    editor.apply();
-                    mainLayout.removeViews(3,nReceiver);
-                    if (nReceiver == 10){
-                        btnAddReceiver.setVisibility(View.VISIBLE);
-                    }
-                    pos = 3;
-                    nReceiver = 0;
-                    Log.d("Max Receiver",pref.getInt(CURRENT_RECEIVER,0)+"");
+                    currentQuota += texts.size();
+                    setCurrentQuota(pref, editor, currentQuota);
+                    removeReceiver();
                 }
             }
         });
@@ -121,7 +126,7 @@ public class ViralActivity extends AppCompatActivity {
                     addLog(status,receiver,isiPesan);
                     Toast.makeText(getApplicationContext(), "Success Send Message", Toast.LENGTH_LONG).show();
                 }else {
-                    Toast.makeText(getApplicationContext(), "Failde Send Message", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Failed Send Message", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -144,19 +149,29 @@ public class ViralActivity extends AppCompatActivity {
         etReceiver = new EditText(this);
         texts.add(etReceiver);
         etReceiver.setHint("Masukkan no penerima");
-        etReceiver.setId(nReceiver);
+        etReceiver.setId(nEtReceiver);
         etReceiver.setInputType(InputType.TYPE_CLASS_NUMBER);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         etReceiver.setLayoutParams(params);
-        nReceiver++;
+        nEtReceiver++;
 
         mainLayout.addView(etReceiver, pos);
         pos++;
     }
 
-    private void addLog(String status, String receiver, String isiPesan) {
+    private void removeReceiver(){
+        texts.clear();
+        mainLayout.removeViews(3,nEtReceiver);
+        if (nEtReceiver == 10){
+            btnAddReceiver.setVisibility(View.VISIBLE);
+        }
+        pos = 3;
+        nEtReceiver = 0;
+    }
+
+    private void addLog(String status, String receiver, String message) {
 
         tvLog = new TextView(getApplicationContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
@@ -166,7 +181,14 @@ public class ViralActivity extends AppCompatActivity {
         tvLog.setTextColor(ContextCompat.getColor(getApplicationContext(), R.color.textColor));
         tvLog.setText(sender + status +
                 " mengirim ke " + receiver +
-                " dengan pesan " + isiPesan);
+                " dengan pesan " + message);
         mainLayout.addView(tvLog);
+    }
+
+    private void setCurrentQuota(SharedPreferences pref, SharedPreferences.Editor editor, int currentQuota){
+        editor.putInt(CURRENT_RECEIVER,currentQuota);
+        editor.apply();
+        currentReceiver = String.valueOf( pref.getInt(CURRENT_RECEIVER,0));
+        tvQuota.setText(currentReceiver);
     }
 }
