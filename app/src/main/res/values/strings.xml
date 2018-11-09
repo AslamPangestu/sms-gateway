@@ -9,5 +9,7 @@
     <string name="message">Isi Pesan : </string>
     <string name="log">Log : </string>
     <string name="quota">Quota : </string>
+    <string name="max_receiver">Maaf, anda telah mencapai batas quota pada bulan ini</string>
     <string name="hint_message">Masukkan isi pesan</string>
+    <string name="seperate">/</string>
 </resources>

@@ -17,9 +17,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import dev.karim.perumahan.model.Viral;
 import dev.karim.perumahan.network.NetworksNotif;
 import dev.karim.perumahan.network.RoutesNotif;
+import dev.karim.perumahan.util.CacheManager;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -32,17 +35,23 @@ import static dev.karim.perumahan.BuildConfig.USERKEY;
 public class ViralActivity extends AppCompatActivity {
 
     //Layout
-    Button btnSubmit, btnAddReceiver;
-    EditText etSender, etReceiver, etMessage;
-    TextView tvLog,tvQuota,tvMaxQuota;
-    LinearLayout mainLayout;
+    @BindView(R.id.main_viral) LinearLayout mainLayout;
+    @BindView(R.id.submit) Button btnSubmit;
+    @BindView(R.id.add_receiver) Button btnAddReceiver;
+    @BindView(R.id.message) EditText etMessage;
+    @BindView(R.id.sender) EditText etSender;
+    @BindView(R.id.max_quota) TextView tvMaxQuota;
+    @BindView(R.id.quota_counter) TextView tvQuota;
+    @BindView(R.id.warning_quota) TextView tvWarning;
 
-    private static final String CURRENT_RECEIVER = "current_receiver";
+    EditText etReceiver;
+    TextView tvLog;
 
+    //Content
     String sender;
     String message;
 
-    //counter
+    //Counter
     int nEtReceiver = 0;
     String maxReceiver = "20";
     String currentReceiver;
@@ -58,27 +67,20 @@ public class ViralActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viral);
 
-        mainLayout = findViewById(R.id.main_viral);
-        etSender = findViewById(R.id.sender);
-        etMessage = findViewById(R.id.message);
-        btnSubmit = findViewById(R.id.submit);
-        btnAddReceiver = findViewById(R.id.add_receiver);
+        ButterKnife.bind(this);
+
         tvQuota = findViewById(R.id.quota_counter);
-        tvMaxQuota = findViewById(R.id.max_quota);
-
-        tvMaxQuota.setText(maxReceiver);
-
-        final SharedPreferences pref = getApplicationContext().getSharedPreferences(CURRENT_RECEIVER, MODE_PRIVATE);
-        final SharedPreferences.Editor editor = pref.edit();
-
-        setCurrentQuota(pref, editor, currentQuota);
 
         btnAddReceiver.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 addReceiver();
-                if (nEtReceiver == 10 || currentReceiver.equals(maxReceiver)) {
+                if (nEtReceiver == 10) {
                     btnAddReceiver.setVisibility(View.GONE);
+                }
+                if (currentReceiver.equals(maxReceiver)){
+                    btnAddReceiver.setVisibility(View.GONE);
+                    tvWarning.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -91,28 +93,22 @@ public class ViralActivity extends AppCompatActivity {
                         mainLayout.removeView(tvLog);
                     }
                 }
-                if (currentReceiver.equals(maxReceiver)){
-                    Toast.makeText(getApplicationContext(),"Maaf, sudah mencapai kuota bulanan",Toast.LENGTH_LONG).show();
-                }else {
-                    sender = etSender.getText().toString();
-                    message = etMessage.getText().toString();
-                    newReceive = new String[texts.size()];
-                    for (int i = 0; i < texts.size(); i++) {
-                        if (texts.size() == 0){
+                sender = etSender.getText().toString();
+                message = etMessage.getText().toString();
+                newReceive = new String[texts.size()];
+                for (int i = 0; i < texts.size(); i++) {
+                    if (texts.size() == 0){
                             Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
-                        }
-                        newReceive[i] = texts.get(i).getText().toString();
-                        getViral(newReceive[i], message,sender);
-                        countView++;
                     }
-                    currentQuota += texts.size();
-                    setCurrentQuota(pref, editor, currentQuota);
-                    removeReceiver();
+                    newReceive[i] = texts.get(i).getText().toString();
+                    getViral(newReceive[i], message,sender);
+                    countView++;
                 }
+                currentQuota += texts.size();
+                removeReceiver();
             }
         });
     }
-
 
     private void getViral(final String receiver, final String isiPesan, final String sender) {
         RoutesNotif routesNotif = NetworksNotif.viralRequest().create(RoutesNotif.class);
@@ -185,10 +181,7 @@ public class ViralActivity extends AppCompatActivity {
         mainLayout.addView(tvLog);
     }
 
-    private void setCurrentQuota(SharedPreferences pref, SharedPreferences.Editor editor, int currentQuota){
-        editor.putInt(CURRENT_RECEIVER,currentQuota);
-        editor.apply();
-        currentReceiver = String.valueOf( pref.getInt(CURRENT_RECEIVER,0));
+    private void setCurrentQuota(SharedPreferences pref1, boolean firstRun, int currentQuota){
         tvQuota.setText(currentReceiver);
     }
 }
