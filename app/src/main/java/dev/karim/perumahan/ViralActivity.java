@@ -1,6 +1,7 @@
 package dev.karim.perumahan;
 
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,18 +14,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import dev.karim.perumahan.model.Counter;
 import dev.karim.perumahan.model.Viral;
-import dev.karim.perumahan.network.NetworksNotif;
-import dev.karim.perumahan.network.RoutesNotif;
-import dev.karim.perumahan.util.CacheManager;
-import retrofit2.Call;
-import retrofit2.Callback;
+import dev.karim.perumahan.network.CustomRequest;
+import dev.karim.perumahan.network.NetworkResponse;
+import dev.karim.perumahan.network.Networks;
+import dev.karim.perumahan.network.Route;
 import retrofit2.Response;
 
 import android.text.InputType;
@@ -44,23 +45,25 @@ public class ViralActivity extends AppCompatActivity {
     @BindView(R.id.quota_counter) TextView tvQuota;
     @BindView(R.id.warning_quota) TextView tvWarning;
 
-    EditText etReceiver;
-    TextView tvLog;
+    //generic textView
+    private TextView tvLog;
 
     //Content
-    String sender;
-    String message;
+    private String sender;
+    private String message;
 
-    //Counter
-    int nEtReceiver = 0;
-    String maxReceiver = "20";
-    String currentReceiver;
-    int currentQuota;
-    int countView = 0;
-    int pos = 3;
+    //Counter View
+    private int nEtReceiver = 0;
+    private int countView = 0;
 
-    List<EditText> texts = new ArrayList<>();
-    String[] newReceive;
+    //counter logic
+    private int maxReceiver = 20;
+    private int tmp, currentReceiver, currentMonth, lastMonth;
+    private int pos = 3;
+    private static int ID = 1;
+
+    private List<EditText> texts = new ArrayList<>();
+    private String[] newReceive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,81 +71,104 @@ public class ViralActivity extends AppCompatActivity {
         setContentView(R.layout.activity_viral);
 
         ButterKnife.bind(this);
+        Calendar calendar = Calendar.getInstance();
 
-        tvQuota = findViewById(R.id.quota_counter);
+        tvMaxQuota.setText(String.valueOf(maxReceiver));
+        getStatus(ID);
+        currentMonth = calendar.get(Calendar.MONTH);
 
-        btnAddReceiver.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                addReceiver();
-                if (nEtReceiver == 10) {
-                    btnAddReceiver.setVisibility(View.GONE);
-                }
-                if (currentReceiver.equals(maxReceiver)){
-                    btnAddReceiver.setVisibility(View.GONE);
-                    tvWarning.setVisibility(View.VISIBLE);
-                }
+        btnAddReceiver.setOnClickListener(v -> {
+            addReceiver();
+            currentReceiver++;
+            Log.d("Current",currentReceiver+"");
+            tvQuota.setText(String.valueOf(currentReceiver));
+
+            if (nEtReceiver == 10) {
+                btnAddReceiver.setVisibility(View.GONE);
+            }
+            if (currentReceiver == maxReceiver){
+                btnAddReceiver.setVisibility(View.GONE);
+                tvWarning.setVisibility(View.VISIBLE);
             }
         });
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        btnSubmit.setOnClickListener(v -> {
+            if (countView == texts.size()) {
+                for (int j = 0; j < texts.size(); j++) {
+                    mainLayout.removeView(tvLog);
+                }
+            }
+            sender = etSender.getText().toString();
+            message = etMessage.getText().toString();
+            newReceive = new String[texts.size()];
+            for (int i = 0; i < texts.size(); i++) {
+                if (texts.size() == 0){
+                        Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
+                }
+                newReceive[i] = texts.get(i).getText().toString();
+                getViral(newReceive[i], message,sender);
+                countView++;
+            }
+            removeReceiver();
+        });
+        putStatus(ID,currentReceiver,currentMonth,lastMonth);
+    }
+
+    private void getViral(final String receiver, final String isiPesan, final String sender) {
+        CustomRequest.request(Networks.viralRequest().getViral(USERKEY, PASSKEY, receiver, isiPesan), new NetworkResponse<Viral>() {
             @Override
-            public void onClick(View v) {
-                if (countView == texts.size()) {
-                    for (int j = 0; j < texts.size(); j++) {
-                        mainLayout.removeView(tvLog);
-                    }
-                }
-                sender = etSender.getText().toString();
-                message = etMessage.getText().toString();
-                newReceive = new String[texts.size()];
-                for (int i = 0; i < texts.size(); i++) {
-                    if (texts.size() == 0){
-                            Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
-                    }
-                    newReceive[i] = texts.get(i).getText().toString();
-                    getViral(newReceive[i], message,sender);
-                    countView++;
-                }
-                currentQuota += texts.size();
-                removeReceiver();
+            public void onSuccess(@NonNull Response<Viral> res) {
+                if (res.body() == null) return;
+                String status = res.body().getMessage().getText();
+                String receiver = res.body().getMessage().getTo();
+                addLog(status,receiver,isiPesan);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+                Log.e("Error", error.getMessage());
             }
         });
     }
 
-    private void getViral(final String receiver, final String isiPesan, final String sender) {
-        RoutesNotif routesNotif = NetworksNotif.viralRequest().create(RoutesNotif.class);
-        Call<Viral> viralCall = routesNotif.getViral(USERKEY, PASSKEY, receiver, isiPesan);
-        viralCall.enqueue(new Callback<Viral>() {
+    private void getStatus(final int id) {
+        CustomRequest.request(Networks.counterRequest().getCounter(id), new NetworkResponse<Counter>() {
+            @Override public void onSuccess(@NonNull Response<Counter> res) {
+                if (res.body() == null) return;
+                currentReceiver = res.body().getCounter();
+                currentMonth = res.body().getCurMonth();
+                lastMonth = res.body().getLastMonth();
+                tvQuota.setText(String.valueOf(currentReceiver));
+            }
+
+            @Override public void onError(Throwable error) {
+                Log.e("Error", error.getMessage());
+            }
+        });
+    }
+
+    private void putStatus(final int id, int counter, int currentMonth, int lastMonth){
+        CustomRequest.request(Networks.counterRequest().putCounter(id, counter, currentMonth, lastMonth), new NetworkResponse<Counter>() {
             @Override
-            public void onResponse(Call<Viral> call, Response<Viral> response) {
-                if(response.isSuccessful()){
-                    String status = response.body().getMessage().getText();
-                    String receiver = response.body().getMessage().getTo();
-                    addLog(status,receiver,isiPesan);
-                    Toast.makeText(getApplicationContext(), "Success Send Message", Toast.LENGTH_LONG).show();
-                }else {
-                    Toast.makeText(getApplicationContext(), "Failed Send Message", Toast.LENGTH_LONG).show();
+            public void onSuccess(@NonNull Response<Counter> res) {
+                if (res.isSuccessful()){
+                    if (res.body() == null) return;
+                    Log.d("Status","Counter : "+res.body().getCounter()+
+                            ", Current Month : "+res.body().getCurMonth()+
+                            ", Last Month : "+res.body().getLastMonth());
                 }
             }
 
             @Override
-            public void onFailure(Call<Viral> call, Throwable t) {
-                if (t instanceof IOException) {
-                    Toast.makeText(getApplicationContext(), "this is an actual network failure :( inform the user and possibly retry", Toast.LENGTH_SHORT).show();
-                    // logging probably not necessary
-                }
-                else {
-                    Toast.makeText(getApplicationContext(), "conversion issue! big problems :(", Toast.LENGTH_SHORT).show();
-                    // todo log to some central bug tracking service
-                }
+            public void onError(Throwable error) {
+                Log.e("Error", error.getMessage());
             }
         });
     }
 
     private void addReceiver() {
 
-        etReceiver = new EditText(this);
+        EditText etReceiver = new EditText(this);
         texts.add(etReceiver);
         etReceiver.setHint("Masukkan no penerima");
         etReceiver.setId(nEtReceiver);
@@ -168,7 +194,6 @@ public class ViralActivity extends AppCompatActivity {
     }
 
     private void addLog(String status, String receiver, String message) {
-
         tvLog = new TextView(getApplicationContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -181,7 +206,4 @@ public class ViralActivity extends AppCompatActivity {
         mainLayout.addView(tvLog);
     }
 
-    private void setCurrentQuota(SharedPreferences pref1, boolean firstRun, int currentQuota){
-        tvQuota.setText(currentReceiver);
-    }
 }

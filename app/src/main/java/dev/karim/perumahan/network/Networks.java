@@ -6,13 +6,14 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
+import static dev.karim.perumahan.BuildConfig.COUNTER_URL;
 import static dev.karim.perumahan.BuildConfig.SMS_GATEWAY_URL;
 
 /**
  * Created by mvryan on 03/08/18.
  */
 
-public class NetworksNotif {
+public class Networks {
 
     public final static String NOTIF_URL = "http://192.168.100.3:8080/";//local_ip/route_name
 
@@ -40,7 +41,7 @@ public class NetworksNotif {
         return retrofit;
     }
 
-    public static Retrofit viralRequest(){
+    public static Route viralRequest(){
 
         interceptor();
 
@@ -50,6 +51,19 @@ public class NetworksNotif {
                 .client(client)
                 .build();
 
-        return retrofit;
+        return retrofit.create(Route.class);
+    }
+
+    public static Route counterRequest(){
+
+        interceptor();
+
+        retrofit = new Retrofit.Builder()
+                .baseUrl(COUNTER_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+
+        return retrofit.create(Route.class);
     }
 }

@@ -16,6 +16,7 @@ android {
             buildConfigField 'String', "USERKEY", USERKEY
             buildConfigField 'String', "PASSKEY", PASSKEY
             buildConfigField 'String', "SMS_GATEWAY_URL", SMS_GATEWAY_URL
+            buildConfigField 'String', "COUNTER_URL", COUNTER_URL
         }
         release {
             minifyEnabled false
@@ -23,7 +24,12 @@ android {
             buildConfigField 'String', "USERKEY", USERKEY
             buildConfigField 'String', "PASSKEY", PASSKEY
             buildConfigField 'String', "SMS_GATEWAY_URL", SMS_GATEWAY_URL
+            buildConfigField 'String', "COUNTER_URL", COUNTER_URL
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
