@@ -1,6 +1,5 @@
 package dev.karim.perumahan;
 
-import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import butterknife.BindView;
@@ -25,7 +23,6 @@ import dev.karim.perumahan.model.Viral;
 import dev.karim.perumahan.network.CustomRequest;
 import dev.karim.perumahan.network.NetworkResponse;
 import dev.karim.perumahan.network.Networks;
-import dev.karim.perumahan.network.Route;
 import retrofit2.Response;
 
 import android.text.InputType;
@@ -58,7 +55,7 @@ public class ViralActivity extends AppCompatActivity {
 
     //counter logic
     private int maxReceiver = 20;
-    private int tmp, currentReceiver, currentMonth, lastMonth;
+    private int currentReceiver;
     private int pos = 3;
     private static int ID = 1;
 
@@ -71,26 +68,9 @@ public class ViralActivity extends AppCompatActivity {
         setContentView(R.layout.activity_viral);
 
         ButterKnife.bind(this);
-        Calendar calendar = Calendar.getInstance();
 
         tvMaxQuota.setText(String.valueOf(maxReceiver));
-        getStatus(ID);
-        currentMonth = calendar.get(Calendar.MONTH);
-
-        btnAddReceiver.setOnClickListener(v -> {
-            addReceiver();
-            currentReceiver++;
-            Log.d("Current",currentReceiver+"");
-            tvQuota.setText(String.valueOf(currentReceiver));
-
-            if (nEtReceiver == 10) {
-                btnAddReceiver.setVisibility(View.GONE);
-            }
-            if (currentReceiver == maxReceiver){
-                btnAddReceiver.setVisibility(View.GONE);
-                tvWarning.setVisibility(View.VISIBLE);
-            }
-        });
+        getCounter(ID);
 
         btnSubmit.setOnClickListener(v -> {
             if (countView == texts.size()) {
@@ -111,7 +91,7 @@ public class ViralActivity extends AppCompatActivity {
             }
             removeReceiver();
         });
-        putStatus(ID,currentReceiver,currentMonth,lastMonth);
+//        putStatus(ID,currentReceiver);
     }
 
     private void getViral(final String receiver, final String isiPesan, final String sender) {
@@ -131,14 +111,13 @@ public class ViralActivity extends AppCompatActivity {
         });
     }
 
-    private void getStatus(final int id) {
+    private void getCounter(final int id) {
         CustomRequest.request(Networks.counterRequest().getCounter(id), new NetworkResponse<Counter>() {
             @Override public void onSuccess(@NonNull Response<Counter> res) {
                 if (res.body() == null) return;
                 currentReceiver = res.body().getCounter();
-                currentMonth = res.body().getCurMonth();
-                lastMonth = res.body().getLastMonth();
                 tvQuota.setText(String.valueOf(currentReceiver));
+                addReceiver();
             }
 
             @Override public void onError(Throwable error) {
@@ -147,15 +126,30 @@ public class ViralActivity extends AppCompatActivity {
         });
     }
 
-    private void putStatus(final int id, int counter, int currentMonth, int lastMonth){
-        CustomRequest.request(Networks.counterRequest().putCounter(id, counter, currentMonth, lastMonth), new NetworkResponse<Counter>() {
+    private void addReceiver(){
+        btnAddReceiver.setOnClickListener(v -> {
+            newReceiver();
+            currentReceiver++;
+            tvQuota.setText(String.valueOf(currentReceiver));
+
+            if (nEtReceiver == 10) {
+                btnAddReceiver.setVisibility(View.GONE);
+            }
+            if (currentReceiver == maxReceiver){
+                btnAddReceiver.setVisibility(View.GONE);
+                tvWarning.setVisibility(View.VISIBLE);
+            }
+            putCounter(ID,currentReceiver);
+        });
+    }
+
+    private void putCounter(final int id, int counter){
+        CustomRequest.request(Networks.counterRequest().putCounter(id, counter), new NetworkResponse<Counter>() {
             @Override
             public void onSuccess(@NonNull Response<Counter> res) {
                 if (res.isSuccessful()){
                     if (res.body() == null) return;
-                    Log.d("Status","Counter : "+res.body().getCounter()+
-                            ", Current Month : "+res.body().getCurMonth()+
-                            ", Last Month : "+res.body().getLastMonth());
+                    Log.d("Counter","Counter : "+res.body().getCounter());
                 }
             }
 
@@ -166,7 +160,7 @@ public class ViralActivity extends AppCompatActivity {
         });
     }
 
-    private void addReceiver() {
+    private void newReceiver() {
 
         EditText etReceiver = new EditText(this);
         texts.add(etReceiver);

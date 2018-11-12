@@ -35,7 +35,5 @@ public interface Route {
     @PUT("counter/{id}")
     @FormUrlEncoded
     Call<Counter> putCounter(@Path("id") int id,
-                             @Field("counter") int counter,
-                             @Field("curMonth") int curMonth,
-                             @Field("lastMonth") int lastMonth);
+                             @Field("counter") int counter);
 }

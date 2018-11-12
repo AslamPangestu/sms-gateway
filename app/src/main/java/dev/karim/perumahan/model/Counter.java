@@ -15,12 +15,6 @@ public class Counter implements Parcelable
     @SerializedName("counter")
     @Expose
     private int counter;
-    @SerializedName("cur_month")
-    @Expose
-    private int curMonth;
-    @SerializedName("last_month")
-    @Expose
-    private int lastMonth;
     @SerializedName("createdAt")
     @Expose
     private Object createdAt;
@@ -37,8 +31,6 @@ public class Counter implements Parcelable
             Counter instance = new Counter();
             instance.id = ((int) in.readValue((int.class.getClassLoader())));
             instance.counter = ((int) in.readValue((int.class.getClassLoader())));
-            instance.curMonth = ((int) in.readValue((int.class.getClassLoader())));
-            instance.lastMonth = ((int) in.readValue((int.class.getClassLoader())));
             instance.createdAt = ((Object) in.readValue((Object.class.getClassLoader())));
             instance.updatedAt = ((Object) in.readValue((Object.class.getClassLoader())));
             return instance;
@@ -88,43 +80,7 @@ public class Counter implements Parcelable
     }
 
     /**
-     * 
-     * @return
-     *     The curMonth
-     */
-    public int getCurMonth() {
-        return curMonth;
-    }
-
-    /**
-     * 
-     * @param curMonth
-     *     The cur_month
-     */
-    public void setCurMonth(int curMonth) {
-        this.curMonth = curMonth;
-    }
-
-    /**
-     * 
-     * @return
-     *     The lastMonth
-     */
-    public int getLastMonth() {
-        return lastMonth;
-    }
-
-    /**
-     * 
-     * @param lastMonth
-     *     The last_month
-     */
-    public void setLastMonth(int lastMonth) {
-        this.lastMonth = lastMonth;
-    }
-
-    /**
-     * 
+     *
      * @return
      *     The createdAt
      */
@@ -162,8 +118,6 @@ public class Counter implements Parcelable
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeValue(id);
         dest.writeValue(counter);
-        dest.writeValue(curMonth);
-        dest.writeValue(lastMonth);
         dest.writeValue(createdAt);
         dest.writeValue(updatedAt);
     }
