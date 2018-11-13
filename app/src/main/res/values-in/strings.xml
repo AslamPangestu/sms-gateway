@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Perumahan</string>
+    <string name="sender">Pengirim</string>
+    <string name="hint_sender">Masukkan nama pengirim</string>
+    <string name="submit">Kirim Viral</string>
+    <string name="add_receiver">Tambah Nomor Penerima</string>
+    <string name="receiver">Nomor Penerima</string>
+    <string name="hint_receiver">Masukkan nomor penerima</string>
+    <string name="message">Isi Pesan : </string>
+    <string name="log">Log : </string>
+    <string name="quota">Kuota : </string>
+    <string name="max_add_receiver">Maaf, anda telah mencapai batas penambahan nomor penerima dalam 1x pengiriman</string>
+    <string name="max_receiver">Maaf, anda telah mencapai batas kuota viral</string>
+    <string name="hint_message">Masukkan isi pesan</string>
+    <string name="separate">/</string>
+    <string name="viral_title">SMS Viral</string>
+    <string name="viral_content">Silahkan anda memberitahukan tentang PURI KALIMAYA kepada kerabat dekat anda melalui SMS VIRAL ini. Jika kerabat anda memesan rumah disini, anda akan mendapat voucher sebesar Rp. 100.000,00.</string>
+</resources>

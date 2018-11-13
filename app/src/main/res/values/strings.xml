@@ -1,15 +1,18 @@
 <resources>
     <string name="app_name">Perumahan</string>
-    <string name="sender">Pengirim</string>
-    <string name="hint_sender">Masukkan nama pengirim</string>
-    <string name="submit">Submit</string>
-    <string name="add_receiver">+</string>
-    <string name="receiver">Penerima</string>
-    <string name="hint_receiver">Masukkan no penerima</string>
-    <string name="message">Isi Pesan : </string>
+    <string name="sender">Sender</string>
+    <string name="hint_sender">Input sender name</string>
+    <string name="submit">Send Viral</string>
+    <string name="add_receiver">Add Receiver Number</string>
+    <string name="receiver">Receiver Number</string>
+    <string name="hint_receiver">Input receiver number</string>
+    <string name="message">Message : </string>
     <string name="log">Log : </string>
     <string name="quota">Quota : </string>
-    <string name="max_receiver">Maaf, anda telah mencapai batas quota pada bulan ini</string>
+    <string name="max_add_receiver">Sorry, you have reached the limit of adding receiver numbers in 1x send</string>
+    <string name="max_receiver">Sorry, you have reached the viral quota limit</string>
     <string name="hint_message">Masukkan isi pesan</string>
-    <string name="seperate">/</string>
+    <string name="separate">/</string>
+    <string name="viral_title">Viral SMS</string>
+    <string name="viral_content">Please tell your friend about PURI KALIMAYA via this VIRAL SMS. If your friend orders a house here, you will get a voucher of Rp. 100.000,00.</string>
 </resources>
