@@ -54,7 +54,7 @@ public class Networks {
         return retrofit.create(Route.class);
     }
 
-    public static Route counterRequest(){
+    public static Route perumahanRequest(){
 
         interceptor();
 

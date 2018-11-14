@@ -18,6 +18,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dev.karim.perumahan.model.Counter;
+import dev.karim.perumahan.model.Message;
 import dev.karim.perumahan.model.Viral;
 import dev.karim.perumahan.network.CustomRequest;
 import dev.karim.perumahan.network.NetworkResponse;
@@ -39,7 +40,6 @@ public class ViralActivity extends AppCompatActivity {
     @BindView(R.id.max_quota) TextView tvMaxQuota;
     @BindView(R.id.quota_counter) TextView tvQuota;
     @BindView(R.id.warning_quota) TextView tvWarning;
-    @BindView(R.id.viral_title) TextView tvTitle;
     @BindView(R.id.viral_content) TextView tvContent;
     @BindView(R.id.sender_tv) TextView tvSender;
     @BindView(R.id.message_title) TextView tvMessageTitle;
@@ -57,7 +57,7 @@ public class ViralActivity extends AppCompatActivity {
     //counter logic
     private int maxReceiver = 20;
     private int currentReceiver;
-    private int pos = 3;
+    private int pos = 5;
     private static int ID = 1;
 
     private List<EditText> texts = new ArrayList<>();
@@ -67,15 +67,16 @@ public class ViralActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viral);
+        getSupportActionBar().setTitle(getResources().getText(R.string.viral_title));
 
         ButterKnife.bind(this);
 
         layoutText();
         getCounter(ID);
+        getMessage(ID);
 
         btnSubmit.setOnClickListener(v -> {
             sender = etSender.getText().toString();
-//            message = etMessage.getText().toString();
             newReceive = new String[texts.size()];
             for (int i = 0; i < texts.size(); i++) {
                 if (texts.size() == 0){
@@ -89,7 +90,6 @@ public class ViralActivity extends AppCompatActivity {
     }
 
     private void layoutText(){
-        tvTitle.setText(getResources().getText(R.string.viral_title));
         tvContent.setText(getResources().getText(R.string.viral_content));
         tvSender.setText(getResources().getText(R.string.sender));
         etSender.setHint(getResources().getText(R.string.hint_sender));
@@ -121,7 +121,7 @@ public class ViralActivity extends AppCompatActivity {
     }
 
     private void getCounter(final int id) {
-        CustomRequest.request(Networks.counterRequest().getCounter(id), new NetworkResponse<Counter>() {
+        CustomRequest.request(Networks.perumahanRequest().getCounter(id), new NetworkResponse<Counter>() {
             @Override public void onSuccess(@NonNull Response<Counter> res) {
                 if (res.body() == null) return;
                 currentReceiver = res.body().getCounter();
@@ -135,6 +135,22 @@ public class ViralActivity extends AppCompatActivity {
         });
     }
 
+    private void getMessage(final int id){
+        CustomRequest.request(Networks.perumahanRequest().getMessage(id), new NetworkResponse<Message>() {
+            @Override
+            public void onSuccess(@NonNull Response<Message> res) {
+                if (res.body() == null) return;
+                message = res.body().getMessage();
+                tvMessage.setText(message);
+            }
+
+            @Override
+            public void onError(Throwable error) {
+
+            }
+        });
+    }
+
     private void addReceiver(){
         btnAddReceiver.setOnClickListener(v -> {
             newReceiver();
@@ -143,7 +159,7 @@ public class ViralActivity extends AppCompatActivity {
 
             if (nEtReceiver == 10) {
                 btnAddReceiver.setVisibility(View.GONE);
-                tvWarning.setText(getResources().getText(R.string.max_receiver));
+                tvWarning.setText(getResources().getText(R.string.max_add_receiver));
                 tvWarning.setVisibility(View.VISIBLE);
             }
             if (currentReceiver >= maxReceiver){
@@ -156,7 +172,7 @@ public class ViralActivity extends AppCompatActivity {
     }
 
     private void putCounter(final int id, int counter){
-        CustomRequest.request(Networks.counterRequest().putCounter(id, counter), new NetworkResponse<Counter>() {
+        CustomRequest.request(Networks.perumahanRequest().putCounter(id, counter), new NetworkResponse<Counter>() {
             @Override
             public void onSuccess(@NonNull Response<Counter> res) {
                 if (res.isSuccessful()){

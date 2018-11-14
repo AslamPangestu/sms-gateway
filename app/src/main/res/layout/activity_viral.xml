@@ -16,17 +16,6 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/viral_title"
-            android:textStyle="bold"
-            android:id="@+id/viral_title"
-            android:textColor="@color/textColor"
-            android:textAllCaps="true"
-            android:textSize="24sp"
-            android:layout_gravity="center"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:textSize="14sp"
             android:id="@+id/viral_content"
             android:text="@string/viral_content"
@@ -71,7 +60,7 @@
             android:id="@+id/message"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="@color/textColor"/>
 
         <TextView
@@ -116,6 +105,7 @@
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:layout_marginBottom="24dp"
             android:orientation="horizontal">
 
             <TextView

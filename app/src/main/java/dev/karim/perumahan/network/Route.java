@@ -1,6 +1,7 @@
 package dev.karim.perumahan.network;
 
 import dev.karim.perumahan.model.Counter;
+import dev.karim.perumahan.model.Message;
 import dev.karim.perumahan.model.Viral;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -31,6 +32,9 @@ public interface Route {
 
     @GET("counter/{id}")
     Call<Counter> getCounter(@Path("id") int id);
+
+    @GET("message/{id}")
+    Call<Message> getMessage(@Path("id") int id);
 
     @PUT("counter/{id}")
     @FormUrlEncoded
