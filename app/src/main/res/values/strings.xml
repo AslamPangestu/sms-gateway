@@ -3,7 +3,9 @@
     <string name="sender">Sender</string>
     <string name="hint_sender">Input sender name</string>
     <string name="submit">Send Viral</string>
-    <string name="add_receiver">Add Receiver Number</string>
+    <string name="add_receiver">Add New Receiver</string>
+    <string name="remove_receiver">Remove Receiver</string>
+    <string name="no_receiver">There is no receiver</string>
     <string name="receiver">Receiver Number</string>
     <string name="hint_receiver">Input receiver number</string>
     <string name="message">Message : </string>

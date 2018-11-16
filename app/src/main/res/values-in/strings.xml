@@ -3,7 +3,9 @@
     <string name="sender">Pengirim</string>
     <string name="hint_sender">Masukkan nama pengirim</string>
     <string name="submit">Kirim Viral</string>
-    <string name="add_receiver">Tambah Nomor Penerima</string>
+    <string name="add_receiver">Tambah Penerima Baru</string>
+    <string name="remove_receiver">Hapus Penerima</string>
+    <string name="no_receiver">Tidak ada penerima</string>
     <string name="receiver">Nomor Penerima</string>
     <string name="hint_receiver">Masukkan nomor penerima</string>
     <string name="message">Isi Pesan : </string>

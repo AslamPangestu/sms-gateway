@@ -8,7 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,6 +39,7 @@ public class ViralActivity extends AppCompatActivity {
     @BindView(R.id.main_viral) LinearLayout mainLayout;
     @BindView(R.id.submit) Button btnSubmit;
     @BindView(R.id.add_receiver) Button btnAddReceiver;
+    @BindView(R.id.remove_receiver) Button btnRemoveReceiver;
     @BindView(R.id.sender) EditText etSender;
     @BindView(R.id.max_quota) TextView tvMaxQuota;
     @BindView(R.id.quota_counter) TextView tvQuota;
@@ -46,6 +50,8 @@ public class ViralActivity extends AppCompatActivity {
     @BindView(R.id.message) TextView tvMessage;
     @BindView(R.id.receiver_title) TextView tvReceiverTitle;
     @BindView(R.id.quota) TextView tvQuotaTitle;
+    @BindView(R.id.progress) FrameLayout progressBar;
+    @BindView(R.id.viral) ScrollView viralLayout;
 
     //Content
     private String sender;
@@ -74,18 +80,20 @@ public class ViralActivity extends AppCompatActivity {
         layoutText();
         getCounter(ID);
         getMessage(ID);
+        removeReceiver();
 
         btnSubmit.setOnClickListener(v -> {
-            sender = etSender.getText().toString();
-            newReceive = new String[texts.size()];
-            for (int i = 0; i < texts.size(); i++) {
-                if (texts.size() == 0){
-                        Toast.makeText(getApplicationContext(),"Maaf, penerima tidak ada",Toast.LENGTH_LONG).show();
+            if (nEtReceiver == 0) {
+                Toast.makeText(getApplicationContext(), getResources().getText(R.string.no_receiver), Toast.LENGTH_LONG).show();
+            }else {
+                sender = etSender.getText().toString();
+                newReceive = new String[texts.size()];
+                for (int i = 0; i < texts.size(); i++) {
+                    newReceive[i] = texts.get(i).getText().toString();
+                    getViral(newReceive[i], message,sender);
                 }
-                newReceive[i] = texts.get(i).getText().toString();
-                getViral(newReceive[i], message,sender);
             }
-            removeReceiver();
+            clearReceiver();
         });
     }
 
@@ -110,7 +118,6 @@ public class ViralActivity extends AppCompatActivity {
                 String receiver = res.body().getMessage().getTo();
                 Log.d("Status","Status : "+status+"; Penerima : "+receiver);
                 Toast.makeText(getApplicationContext(),"Status : "+status+"; Penerima : "+receiver,Toast.LENGTH_LONG).show();
-//                addLog(status,receiver,isiPesan);
             }
 
             @Override
@@ -121,18 +128,29 @@ public class ViralActivity extends AppCompatActivity {
     }
 
     private void getCounter(final int id) {
+        isLoading(true);
         CustomRequest.request(Networks.perumahanRequest().getCounter(id), new NetworkResponse<Counter>() {
             @Override public void onSuccess(@NonNull Response<Counter> res) {
                 if (res.body() == null) return;
                 currentReceiver = res.body().getCounter();
                 tvQuota.setText(String.valueOf(currentReceiver));
+                isLoading(false);
                 addReceiver();
             }
-
             @Override public void onError(Throwable error) {
-                Log.e("Error", error.getMessage());
+                isLoading(false);
             }
         });
+    }
+
+    private void isLoading(boolean status) {
+        if (status) {
+            viralLayout.setVisibility(View.GONE);
+            progressBar.setVisibility(View.VISIBLE);
+        } else {
+            viralLayout.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.GONE);
+        }
     }
 
     private void getMessage(final int id){
@@ -171,6 +189,21 @@ public class ViralActivity extends AppCompatActivity {
         });
     }
 
+    private void removeReceiver(){
+        btnRemoveReceiver.setOnClickListener(v -> {
+            if (nEtReceiver ==0){
+                Toast.makeText(getApplicationContext(),getResources().getText(R.string.no_receiver),Toast.LENGTH_LONG).show();
+            }else {
+                currentReceiver--;
+                nEtReceiver--;
+                tvQuota.setText(String.valueOf(currentReceiver));
+                mainLayout.removeViewAt(5+nEtReceiver);
+                pos = 5;
+                putCounter(ID,currentReceiver);
+            }
+        });
+    }
+
     private void putCounter(final int id, int counter){
         CustomRequest.request(Networks.perumahanRequest().putCounter(id, counter), new NetworkResponse<Counter>() {
             @Override
@@ -205,13 +238,13 @@ public class ViralActivity extends AppCompatActivity {
         pos++;
     }
 
-    private void removeReceiver(){
+    private void clearReceiver(){
         texts.clear();
-        mainLayout.removeViews(3,nEtReceiver);
+        mainLayout.removeViews(5,nEtReceiver);
         if (nEtReceiver == 10){
             btnAddReceiver.setVisibility(View.VISIBLE);
         }
-        pos = 3;
+        pos = 5;
         nEtReceiver = 0;
     }
 
